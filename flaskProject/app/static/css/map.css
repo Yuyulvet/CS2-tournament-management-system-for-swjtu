@@ -1,0 +1,38 @@
+    .map-icon {
+       width: 24px;
+       height: 24px;
+       object-fit: contain;
+       vertical-align: middle;
+       margin-right: 8px;
+   }
+   
+   .dropdown-item {
+       display: flex;
+       align-items: center;
+       padding: 8px 16px;
+   }
+   
+   .dropdown-toggle {
+       display: flex;
+       align-items: center;
+       min-width: 200px;
+   }
+
+.map-selection {
+    margin-bottom: 20px;
+}
+
+.map-preview {
+    margin-top: 10px;
+    text-align: center;
+}
+
+.map-preview img {
+    max-width: 200px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.map-select {
+    margin-bottom: 10px;
+}

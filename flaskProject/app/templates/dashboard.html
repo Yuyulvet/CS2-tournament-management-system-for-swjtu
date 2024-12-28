@@ -1,0 +1,215 @@
+<!-- home.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link href="{{ url_for('static', filename='css/bootstrap.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet">
+</head>
+<body>
+    <header class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <h1 class="navbar-brand">CSGO Tournament Management System</h1>
+            <div class="user-info text-white">
+                <span>Welcome, {{ session.get('username', 'None') }}</span>
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light ml-2">log out</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% if role == 'manager' %}
+        <!-- 管理员功能区 -->
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">Tournament Management</h3>
+                        <p class="card-text">Manage all event information, match schedules, and results</p>
+                        <a href="{{ url_for('main.tournament_info') }}" class="btn btn-primary">Manage events</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">Team Management</h3>
+                        <p class="card-text">View and manage all participating team information</p>
+                        <a href="{{ url_for('main.team_management') }}" class="btn btn-primary">Manage teams</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">Statistics</h3>
+                        <p class="card-text">View overall system statistics</p>
+                        <a href="{{ url_for('main.statistics') }}" class="btn btn-primary">View statistics</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4"></div>
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title">User Management</h3>
+                    <p class="card-text">Manage system user accounts and permissions</p>
+                    <a href="{{ url_for('main.user_management') }}" class="btn btn-primary">Manage users</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title">Profile</h3>
+                    <p class="card-text">Manage your profile and account settings</p>
+                    <a href="{{ url_for('main.edit_profile') }}" class="btn btn-primary">edit profile</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">System Overview</h3>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="stat-item">
+                                    <h4>Total Teams</h4>
+                                    <p class="h2">{{ total_teams }}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stat-item">
+                                    <h4>Total Tournaments</h4>
+                                    <p class="h2">{{ total_tournaments }}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stat-item">
+                                    <h4>Total Matches</h4>
+                                    <p class="h2">{{ total_matches }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% elif role == 'participant' %}
+        <!-- 参赛者功能区 -->
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">Profile</h3>
+                        <p class="card-text">Manage your profile and account settings</p>
+                        <a href="{{ url_for('main.edit_profile') }}" class="btn btn-primary">Edit profile</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">Event Center</h3>
+                        <p class="card-text">Browse all event information and register</p>
+                        <a href="{{ url_for('main.tournament_list') }}" class="btn btn-primary">Check Event</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">My Team</h3>
+                        {% if user_team %}
+                            <p class="card-text">{{ user_team.name }}</p>
+                            <a href="{{ url_for('main.edit_team', team_id=user_team.id) }}" class="btn btn-primary">Edit Team</a>
+                            <a href="{{ url_for('main.manage_players', team_id=user_team.id) }}" class="btn btn-primary">Manage Player</a>
+                        {% else %}
+                            <p class="card-text">You haven't created a clan yet</p>
+                            <a href="{{ url_for('main.create_team') }}" class="btn btn-primary">Create my team</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if user_team %}
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">Upcoming Matches</h3>
+                        {% if upcoming_matches %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Opponents</th>
+                                        <th>Time</th>
+                                        <th>Format</th>
+                                        <th>Maps</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for match in upcoming_matches %}
+                                    <tr>
+                                        <td>{{ match.team1.name }} vs {{ match.team2.name }}</td>
+                                        <td>{{ match.match_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                                        <td>{{ match.tournament_format }}</td>
+                                        <td>
+                                            {% if match.maps %}
+                                                {% for map in match.maps %}
+                                                    <div class="map-item">
+                                                        <img src="{{ url_for('static', filename='image/maps/' + map.name.lower() + '.png') }}" 
+                                                             alt="{{ map.name }}" 
+                                                             class="map-icon" 
+                                                             style="width: 30px; height: 30px; margin-right: 5px; object-fit: cover;">
+                                                        {{ map.name }}{% if not loop.last %}, {% endif %}
+                                                    </div>
+                                                {% endfor %}
+                                            {% else %}
+                                                TBD
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <p class="text-muted">No upcoming matches</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% endif %}
+    </main>
+
+    <script src="{{ url_for('static', filename='js/jquery-3.6.0.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
+
+
