@@ -41,9 +41,9 @@ def create_app():
 
     return app
 
-# 添加这一行，创建全局 app 变量
+# 创建全局 app 实例
 app = create_app()
 
-# 如果需要，也可以添加 handler
+# 添加 Vercel 所需的 handler 函数
 def handler(event, context):
-return app(event, context)
+    return app(event['body'], event['headers'])
