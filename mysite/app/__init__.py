@@ -4,6 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from model import Base
 from flask_wtf.csrf import CSRFProtect
+import os
 
 csrf = CSRFProtect()
 
@@ -12,17 +13,28 @@ application = None
 app = None
 
 def create_app():
-    global application, app  # 声明使用全局变量
+    global application, app
     
     application = Flask(__name__)
-    app = application  # 同时设置 app 变量
+    app = application
     
     app.config['SECRET_KEY'] = 'your-secret-key-here'
     app.config['UPLOAD_FOLDER'] = 'app/static/uploads/team_avatars'
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
     
-    engine = create_engine('sqlite:///my_database.db')
+    # 使用 Railway 提供的环境变量构建数据库 URL
+    MYSQL_URL = f"mysql://root:{os.getenv('MYSQL_ROOT_PASSWORD')}@{os.getenv('MYSQLHOST')}:{os.getenv('MYSQLPORT')}/{os.getenv('MYSQL_DATABASE')}"
+    
+    # 创建 MySQL 引擎
+    engine = create_engine(
+        MYSQL_URL,
+        pool_size=5,
+        pool_recycle=3600,
+        pool_pre_ping=True
+    )
+    
     Base.metadata.create_all(engine)
+    
     Session = scoped_session(sessionmaker(bind=engine))
     app.db_session = Session
     
@@ -40,7 +52,6 @@ def create_app():
         
     return app
 
-# 确保在模块级别创建应用实例
 app = create_app()
 
 def handler(event, context):
