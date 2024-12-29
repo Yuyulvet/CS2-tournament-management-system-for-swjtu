@@ -41,9 +41,9 @@ def create_app():
 
     return app
 
-    # 添加这一行，创建全局 app 变量
-    app = create_app()
+# 添加这一行，创建全局 app 变量
+app = create_app()
 
-    # 如果需要，也可以添加 handler
-    def handler(event, context):
-    return app(event, context)
+# 如果需要，也可以添加 handler
+def handler(event, context):
+return app(event, context)
