@@ -1,0 +1,6 @@
+flask
+sqlalchemy
+flask-wtf
+pymysql
+bcrypt
+python-dotenv

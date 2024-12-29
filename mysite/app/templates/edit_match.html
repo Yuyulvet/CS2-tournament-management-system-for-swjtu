@@ -1,0 +1,213 @@
+<!-- edit_match.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Match</title>
+    <link href="{{ url_for('static', filename='css/bootstrap.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/map.css') }}" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <h1>Edit Match</h1>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('main.home') }}">Home</a></li>
+            <li><a href="{{ url_for('main.tournament_info') }}">Tournament Information</a></li>
+        </ul>
+    </header>
+    <main>
+        <form method="post" id="matchForm" onsubmit="return validateTeams()">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="overall_score" id="overall_score" value="">
+            <div class="form-group">
+                <label for="team1_id">Team1:</label>
+                <select name="team1_id" id="team1_id" required>
+                    {% for team in teams %}
+                    <option value="{{ team.id }}" {% if team.id == match.team1_id %}selected{% endif %}>
+                        {{ team.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="team2_id">Team2:</label>
+                <select name="team2_id" id="team2_id" required>
+                    {% for team in teams %}
+                    <option value="{{ team.id }}" {% if team.id == match.team2_id %}selected{% endif %}>
+                        {{ team.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="tournament_format">Format:</label>
+                <select name="tournament_format" id="tournament_format" required onchange="updateMaps()">
+                    <option value="bo1" {% if match.tournament_format == 'bo1' %}selected{% endif %}>BO1</option>
+                    <option value="bo3" {% if match.tournament_format == 'bo3' %}selected{% endif %}>BO3</option>
+                    <option value="bo5" {% if match.tournament_format == 'bo5' %}selected{% endif %}>BO5</option>
+                </select>
+            </div>
+            <div id="maps-container" class="form-group">
+                <label>map choices and score:</label>
+                <div id="map-selections">
+                    <!-- map selection and score will be dynamically generated via JavaScript -->
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="match_time">Match Time:</label>
+                <input type="datetime-local" name="match_time" id="match_time" 
+                       value="{{ match.match_time.strftime('%Y-%m-%dT%H:%M') }}" required>
+            </div>
+            <div class="form-group">
+                <label for="winner_id">Winner:</label>
+                <select name="winner_id" id="winner_id">
+                    <option value="">Not decided</option>
+                    {% for team in teams %}
+                    <option value="{{ team.id }}" {% if team.id == match.winner_id %}selected{% endif %}>
+                        {{ team.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Save changes</button>
+        </form>
+    </main>
+    <script src="{{url_for('static', filename='js/jquery-3.6.0.min.js')}}"></script>
+    <script src="{{url_for('static', filename='js/popper.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        const mapIcons = {
+            'mirage': '{{ url_for("static", filename="image/mirage.png") }}',
+            'inferno': '{{ url_for("static", filename="image/inferno.png") }}',
+            'dust2': '{{ url_for("static", filename="image/dust2.png") }}',
+            'ancient': '{{ url_for("static", filename="image/ancient.png") }}',
+            'vertigo': '{{ url_for("static", filename="image/vertigo.png") }}',
+            'anubis': '{{ url_for("static", filename="image/anubis.png") }}',
+            'nuke': '{{ url_for("static", filename="image/nuke.png") }}'
+        };
+
+        function updateMaps() {
+            const format = document.getElementById('tournament_format').value;
+            const container = document.getElementById('map-selections');
+            container.innerHTML = '';
+            
+            const mapCount = format === 'bo1' ? 1 : (format === 'bo3' ? 3 : 5);
+            
+            for (let i = 0; i < mapCount; i++) {
+                const mapDiv = document.createElement('div');
+                mapDiv.className = 'map-selection mb-3';
+                
+                // get team names
+                const team1Name = document.getElementById('team1_id').options[document.getElementById('team1_id').selectedIndex].text;
+                const team2Name = document.getElementById('team2_id').options[document.getElementById('team2_id').selectedIndex].text;
+                
+                mapDiv.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="map_${i}">Map ${i + 1}:</label>
+                            <select name="map_${i}" id="map_${i}" class="form-control" required>
+                                <option value="">Please select a map</option>
+                                <option value="mirage">Mirage</option>
+                                <option value="inferno">Inferno</option>
+                                <option value="dust2">Dust 2</option>
+                                <option value="ancient">Ancient</option>
+                                <option value="vertigo">Vertigo</option>
+                                <option value="anubis">Anubis</option>
+                                <option value="nuke">Nuke</option>
+                            </select>
+                            <div class="map-preview" style="display:none">
+                                <img src="" alt="map preview" style="max-width: 200px; margin-top: 10px;">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="score_${i}">Score:</label>
+                            <input type="text" name="score_${i}" id="score_${i}" 
+                                   class="form-control" placeholder="例如: 16-14">
+                            <div class="map-winner mt-2">
+                                <label>本图胜者:</label>
+                                <select name="map_winner_${i}" id="map_winner_${i}" class="form-control" onchange="updateOverallScore()">
+                                    <option value="">未选择</option>
+                                    <option value="team1">${team1Name}</option>
+                                    <option value="team2">${team2Name}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(mapDiv);
+                
+                const select = mapDiv.querySelector(`#map_${i}`);
+                select.addEventListener('change', function() {
+                    const preview = this.parentElement.querySelector('.map-preview');
+                    const img = preview.querySelector('img');
+                    if (this.value) {
+                        img.src = mapIcons[this.value];
+                        preview.style.display = 'block';
+                    } else {
+                        preview.style.display = 'none';
+                    }
+                });
+            }
+        }
+
+        function updateOverallScore() {
+            let team1Wins = 0;
+            let team2Wins = 0;
+            const format = document.getElementById('tournament_format').value;
+            const mapCount = format === 'bo1' ? 1 : (format === 'bo3' ? 3 : 5);
+            const requiredWins = format === 'bo1' ? 1 : (format === 'bo3' ? 2 : 3);
+            
+            // update the status of each map
+            for (let i = 0; i < mapCount; i++) {
+                const mapWinnerSelect = document.getElementById(`map_winner_${i}`);
+                const winner = mapWinnerSelect.value;
+                
+                if (winner === 'team1') team1Wins++;
+                if (winner === 'team2') team2Wins++;
+                
+                // if a team has reached the required number of wins, disable the winner selection for subsequent maps
+                if (team1Wins >= requiredWins || team2Wins >= requiredWins) {
+                    // disable the winner selection for all subsequent maps
+                    for (let j = i + 1; j < mapCount; j++) {
+                        const nextMapSelect = document.getElementById(`map_winner_${j}`);
+                        if (nextMapSelect) {
+                            nextMapSelect.value = '';
+                            nextMapSelect.disabled = true;
+                        }
+                    }
+                }
+            }
+            
+            // update the overall score
+            const overallScore = `${team1Wins}-${team2Wins}`;
+            document.getElementById('overall_score').value = overallScore;
+            
+            // automatically set the winner
+            const winnerSelect = document.getElementById('winner_id');
+            const team1Select = document.getElementById('team1_id');
+            const team2Select = document.getElementById('team2_id');
+            
+            if (team1Wins >= requiredWins) {
+                winnerSelect.value = team1Select.value;
+            } else if (team2Wins >= requiredWins) {
+                winnerSelect.value = team2Select.value;
+            } else {
+                winnerSelect.value = '';
+            }
+        }
+
+        // initialize when the page loads
+        document.addEventListener('DOMContentLoaded', updateMaps);
+        // update when the format changes
+        document.getElementById('tournament_format').addEventListener('change', updateMaps);
+
+        // add listener for team selection change
+        document.getElementById('team1_id').addEventListener('change', updateMaps);
+        document.getElementById('team2_id').addEventListener('change', updateMaps);
+    </script>
+</body>
+</html>

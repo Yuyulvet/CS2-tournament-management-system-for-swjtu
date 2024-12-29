@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSGO赛事管理系统</title>
+    <link href="{{ url_for('static', filename='css/bootstrap.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/home.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet">
+    <style>
+        .carousel-container {
+            width: 90%;
+            margin: 30px auto;
+        }
+        
+        .carousel-item img {
+            width: 100%;
+            height: 600px;
+            object-fit: cover;
+        }
+        
+        .carousel-caption {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 8px;
+            bottom: 40px;
+        }
+        
+        .carousel-caption h5 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .carousel-caption p {
+            font-size: 16px;
+        }
+        
+        .carousel-control-prev,
+        .carousel-control-next {
+            width: 10%;
+            opacity: 0.8;
+        }
+        
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon {
+            width: 40px;
+            height: 40px;
+        }
+        
+        .carousel-indicators button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin: 0 8px;
+        }
+        
+        .news-section {
+            width: 80%;
+            margin: 30px auto;
+        }
+        
+        .news-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.3s;
+        }
+        
+        .news-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .news-flag {
+            width: 24px;
+            margin-right: 10px;
+        }
+        
+        .news-title {
+            flex-grow: 1;
+            color: #2F4F4F;
+            text-decoration: none;
+        }
+        
+        .news-title:hover {
+            color: #4169E1;
+        }
+        
+        .news-meta {
+            color: #666;
+            font-size: 0.9em;
+            margin-left: 15px;
+        }
+        
+        .news-comments {
+            color: #666;
+            font-size: 0.9em;
+            min-width: 100px;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>2024 FATE's CS2 Tournament Management System for SWJTU</h1>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('main.home') }}">Home</a></li>
+            <li><a href="{{ url_for('main.tournament_list') }}">Tournaments Information</a></li>
+            {% if session.get('role') == 'manager' %}
+                <li><a href="{{ url_for('main.dashboard') }}">dashboard</a></li>
+            {% endif %}
+        </ul>
+        <div class="auth-buttons">
+            {% if not session.get('user_id') %}
+                <button class="login-button" onclick="window.location.href='{{ url_for('auth.login') }}';">Login</button>
+                <button class="signup-button" onclick="window.location.href='{{ url_for('auth.register') }}';">Register</button>
+            {% else %}
+                <button class="logout-button" onclick="window.location.href='{{ url_for('auth.logout') }}';">Logout</button>
+            {% endif %}
+        </div>
+    </header>
+    
+    <main>
+        <!-- carousel section -->
+        <div class="carousel-container">
+            <div id="newsCarousel" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-indicators">
+                    <button type="button" data-bs-target="#newsCarousel" data-bs-slide-to="0" class="active"></button>
+                    <button type="button" data-bs-target="#newsCarousel" data-bs-slide-to="1"></button>
+                    <button type="button" data-bs-target="#newsCarousel" data-bs-slide-to="2"></button>
+                    <button type="button" data-bs-target="#newsCarousel" data-bs-slide-to="3"></button>
+                    <button type="button" data-bs-target="#newsCarousel" data-bs-slide-to="4"></button>
+                </div>
+                
+                <div class="carousel-inner">
+                    <!-- first carousel item -->
+                    <div class="carousel-item active">
+                        <a href="https://www.hltv.org/news/38123/top-20-players-of-2024-torzsi-20" target="_blank">
+                            <img src="{{ url_for('static', filename='image/news/torzsi.jpg') }}" alt="torzsi">
+                            <div class="carousel-caption">
+                                <h5>Top 20 players of 2024: torzsi (20)</h5>
+                                <p>MOUZ's AWPer torzsi首次进入HLTV年度TOP20排名</p>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <!-- second carousel item -->
+                    <div class="carousel-item">
+                        <a href="https://www.hltv.org/news/38122/sources-vitality-agree-terms-with-ropz" target="_blank">
+                            <img src="{{ url_for('static', filename='image/news/ropz.jpg') }}" alt="ropz">
+                            <div class="carousel-caption">
+                                <h5>Sources: Vitality agree terms with ropz</h5>
+                                <p>Vitality即将签下FaZe明星选手ropz</p>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <!-- third carousel item -->
+                    <div class="carousel-item">
+                        <a href="https://www.hltv.org/news/40565/spirit-defeat-faze-2-1-to-win-shanghai-major" target="_blank">
+                            <img src="{{ url_for('static', filename='image/news/spirit.jpg') }}" alt="Elevate">
+                            <div class="carousel-caption">
+                                <h5>Media: Spirit defeat FaZe 2-1 to win Shanghai Major</h5>
+                                <p>新王登基!Spirit在2024年上海Major中以2-1战胜FaZe,夺得冠军</p>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <!-- fourth carousel item -->
+                    <div class="carousel-item">
+                        <a href="https://www.hltv.org/news/40550/highlights-niko-and-malbsmd-combine-to-carry-g2-into-major-semi-final" target="_blank">
+                            <img src="{{ url_for('static', filename='image/news/Niko.jpg') }}" alt="JACKZ">
+                            <div class="carousel-caption">
+                                <h5>Highlights: NiKo and malbsMd combine to carry G2 into Major semi-final</h5>
+                                <p>Niko和malbsMd的精彩表现帮助G2晋级Major半决赛</p>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <!-- fifth carousel item -->
+                    <div class="carousel-item">
+                        <a href="https://www.hltv.org/news/38119/media-falcons-target-ewjerkz-and-jambo" target="_blank">
+                            <img src="{{ url_for('static', filename='image/news/falcons.jpg') }}" alt="Falcons">
+                            <div class="carousel-caption">
+                                <h5>Media: Falcons target ewjerkz and jambo</h5>
+                                <p>Falcons计划引进ewjerkz和jambo加强阵容</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                
+                <button class="carousel-control-prev" type="button" data-bs-target="#newsCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#newsCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
+            </div>
+        </div>
+
+        <!-- news list section -->
+        <div class="news-section">
+            <h2>Latest News</h2>
+            <div class="news-list">
+                <!-- news item 1 -->
+                <div class="news-item">
+                    <img src="{{ url_for('static', filename='image/flags/SE.webp') }}" alt="SE" class="news-flag">
+                    <a href="https://www.hltv.org/news/38118/eclot-part-ways-with-kreaz" class="news-title">
+                        ECLOT part ways with kreaz
+                    </a>
+                </div>
+                
+                <!-- news item 2 -->
+                <div class="news-item">
+                    <img src="{{ url_for('static', filename='image/flags/WORLD.webp') }}" alt="WORLD" class="news-flag">
+                    <a href="https://www.hltv.org/news/38117/vitality-shanghai-last-dance-vlog" class="news-title">
+                        Short: Vitality's Shanghai "last dance" vlog
+                    </a>
+                </div>
+                
+                <!-- news item 3 -->
+                <div class="news-item">
+                    <img src="{{ url_for('static', filename='image/flags/BR.webp') }}" alt="BR" class="news-flag">
+                    <a href="https://www.hltv.org/news/38116/media-lux-and-n1ssim-to-reunite-on-legacy" class="news-title">
+                        Media: lux and n1ssim to reunite on Legacy
+                    </a>
+                </div>
+                
+                <!-- news item 4 -->
+                <div class="news-item">
+                    <img src="{{ url_for('static', filename='image/flags/DE.webp') }}" alt="DE" class="news-flag">
+                    <a href="https://www.hltv.org/news/38115/sources-big-bench-syrson" class="news-title">
+                        Sources: BIG bench syrsoN
+                    </a>
+                </div>
+                
+                <!-- news item 5 -->
+                <div class="news-item">
+                    <img src="{{ url_for('static', filename='image/flags/CH.webp') }}" alt="CH" class="news-flag">
+                    <a href="https://www.hltv.org/news/38114/rigon-and-big-part-ways" class="news-title">
+                        rigoN and BIG part ways
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p class="text-center mt-5">&copy; 2024 FATE's CS2 Tournament Management System for SWJTU</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/jquery-3.6.0.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var myCarousel = new bootstrap.Carousel(document.getElementById('newsCarousel'), {
+                interval: 5000,
+                wrap: true,
+                ride: 'carousel'
+            });
+
+            document.querySelector('.carousel-control-prev').addEventListener('click', function() {
+                myCarousel.prev();
+            });
+
+            document.querySelector('.carousel-control-next').addEventListener('click', function() {
+                myCarousel.next();
+            });
+
+            document.querySelectorAll('.carousel-indicators button').forEach(function(button) {
+                button.addEventListener('click', function() {
+                    myCarousel.to(this.getAttribute('data-bs-slide-to'));
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+
